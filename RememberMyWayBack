@@ -1,0 +1,295 @@
+/*
+GUI File
+Produces a GUI to key in distance and direction
+GUI uses multiple Hbox instances and buttons
+
+Implementation of a private helper class for event listeners for Buttons
+ */
+
+import javafx.application.Application;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class RememberMyWayBack extends Application {
+
+    // |----------------|
+    // | GUI Components |
+    // |----------------|
+
+    // Labels
+    public Label distanceLabel;
+    public Label updateLabel;
+
+    // Entry Components
+    public TextField enterDistanceInFT;
+
+    // Buttons
+    public Button forgetTheWayBackButton;
+    public Button myWayBackButton;
+    public Button northButton;
+    public Button northEastButton;
+    public Button eastButton;
+    public Button southEastButton;
+    public Button southButton;
+    public Button southWestButton;
+    public Button westButton;
+    public Button northWestButton;
+
+
+
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+
+        // |----------------------------|
+        // | Instantiate GUI Components |
+        // |----------------------------|
+
+
+
+        distanceLabel = new Label("Enter Distance in FT");
+        updateLabel = new Label("Program Active");
+
+        enterDistanceInFT = new TextField();
+        enterDistanceInFT.setPrefWidth(133);
+
+
+        forgetTheWayBackButton = new Button("Forget The Way");
+        myWayBackButton = new Button("Find My Way Back");
+
+        northButton = new Button("N");
+        northEastButton = new Button("NE");
+        eastButton = new Button("E");
+        southEastButton = new Button("SE");
+        southButton = new Button("S");
+        southWestButton = new Button("SW");
+        westButton = new Button("W");
+        northWestButton = new Button("NW");
+
+
+
+        // |------------------------|
+        // | Event Action Listeners |
+        // |------------------------|
+
+        // Create instance of HandleEventListener class
+        HandleEventListeners handleEventListeners = new HandleEventListeners();
+
+        // Listeners for the 8 cardinal directions
+        northButton.setOnAction(e -> handleEventListeners.handleEvent("N"));
+        northEastButton.setOnAction(e -> handleEventListeners.handleEvent("NE"));
+        eastButton.setOnAction(e -> handleEventListeners.handleEvent("E"));
+        southEastButton.setOnAction(e -> handleEventListeners.handleEvent("SE"));
+        southButton.setOnAction(e -> handleEventListeners.handleEvent("S"));
+        southWestButton.setOnAction(e -> handleEventListeners.handleEvent("SW"));
+        westButton.setOnAction(e -> handleEventListeners.handleEvent("W"));
+        northWestButton.setOnAction(e -> handleEventListeners.handleEvent("NW"));
+
+        // Listener for outputting the whole way back
+        myWayBackButton.setOnAction(e -> handleEventListeners.showAlert());
+
+        // Listener to clear the stack
+        forgetTheWayBackButton.setOnAction(e -> handleEventListeners.emptyStack());
+
+
+
+        // |------------------|
+        // | Working With GUI |
+        // |------------------|
+
+        GridPane gridPane = new GridPane();
+
+        // Add Buttons to the GridPane
+        gridPane.add(northButton,10,0);
+        gridPane.add(northEastButton,15,4);
+        gridPane.add(eastButton,20,7);
+        gridPane.add(southEastButton,15,12);
+        gridPane.add(southButton,10,15);
+        gridPane.add(southWestButton,5,12);
+        gridPane.add(westButton,0,7);
+        gridPane.add(northWestButton,5,4);
+
+        // Create Hbox for Directions
+        HBox hBox1 = new HBox();
+        hBox1.getChildren().addAll(distanceLabel);
+        hBox1.setAlignment(Pos.CENTER);
+
+        // Create hBox to hold entry and remember button
+        HBox hbox = new HBox();
+        hbox.getChildren().addAll(enterDistanceInFT);
+        hbox.setAlignment(Pos.CENTER);
+
+        // Create Hbox for program Messages
+        HBox hBox3 = new HBox();
+        hBox3.getChildren().addAll(updateLabel);
+        hBox3.setAlignment(Pos.CENTER);
+
+        // Create another button to find all directions
+        HBox hBox2 = new HBox();
+        hBox2.getChildren().addAll(myWayBackButton, forgetTheWayBackButton);
+        hBox2.setAlignment(Pos.CENTER);
+
+        // Set padding and gaps
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.setPadding(new javafx.geometry.Insets(10));
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(gridPane,hBox1, hbox, hBox3, hBox2);
+
+        // Set the title of the stage
+        primaryStage.setTitle("My Way Back");
+
+        // Create a scene with the VBox
+        Scene scene = new Scene(vBox, 370, 400);
+
+        // Set the scene to the stage and show the stage
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+
+    // |--------------|
+    // | Helper Class |
+    // |--------------|
+
+    // Helper Class for eventActionListeners
+    private class HandleEventListeners {
+
+        // |----------------------------|
+        // | Other Class Instances/Etc. |
+        // |----------------------------|
+
+        // Create instance of Stack class and the compass class
+        Compass compass = new Compass();
+        Stack stack = new Stack(20);
+
+        // Variable Keeping Track of all the pushes, later used for running through stack
+        int pushCount = 0;
+
+
+        // |------------------------|
+        // | Event Listener Methods |
+        // |------------------------|
+
+        // Event Handler for the 8 cardinal Direction Buttons
+        //---------------------------------------------------
+        public void handleEvent(String directionIn) {
+            String getDistance = enterDistanceInFT.getText().trim();
+            String getDirection = directionIn;
+            if (!getDistance.isEmpty()) {
+                updateLabel.setText("Direction Remembered!");
+
+                // Concatenate a string to pass to findWayBack method in compass for new String
+                String toFindWayBack = getDirection + ", " + getDistance;
+
+                // Call to findWayBack method and then storing the return value for pushing
+                String wayBack = compass.findWayBack(toFindWayBack);
+
+                // Push into stack
+                stack.push(wayBack);
+
+                // Clears distanceField to allow for next direction
+                enterDistanceInFT.clear();
+
+                // Increment push count
+                pushCount++;
+
+
+            }
+            else
+            {
+                updateLabel.setText("No Distance Entered");
+            }
+        }
+
+
+        // Method which output an alert for the whole way back
+        //----------------------------------------------------
+        private void showAlert() {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+            // Initialize a string which will be updated
+            String output = "";
+
+            // Header Text variable
+            String headerOutput = "";
+
+            // Temporary String for processing
+            String tempString = "";
+
+            // Check to see if stack is populated before working with its data
+            if (!(stack.isEmpty())) {
+
+                // Run through stack poping off every value and storing in output string
+                for (int i = 0; i < pushCount; i ++) {
+                    tempString = stack.pop();
+                    output += tempString + " ft\n";
+
+                }
+                // Update the header for the alert
+                headerOutput = "Your Way Back";
+            }
+            else
+            {
+                output = "Stack Is Empty";
+                headerOutput = "OH NO, You Didn't Record Your Steps";
+            }
+
+            alert.setTitle("The Way Back");
+            alert.setHeaderText(headerOutput);
+            alert.setContentText(output);
+            alert.showAndWait();
+        }
+
+
+        // This is an event listener to clear the stack
+        //---------------------------------------------
+        public void emptyStack() {
+
+            // Check the stack first to see if empty
+            if (stack.isEmpty()) {
+                // Clear the distance field
+                enterDistanceInFT.clear();
+
+                // Create an instance of Error Alert to output
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Currently Remembered");
+                alert.setHeaderText("Don't Know The Way Back");
+                alert.setContentText("Stack Is Empty");
+                alert.showAndWait();
+
+            }
+            else {
+                // Run through stack popping off every value to empty the stack
+                for (int i = 0; i < pushCount; i ++) {
+                    stack.pop();
+
+                    // Then Check to see if stack is empty
+                    if (stack.isEmpty()) {
+                        // Clear the distance field
+                        enterDistanceInFT.clear();
+                        // Create an instance of Error Alert to output
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Currently Remembered");
+                        alert.setHeaderText("Don't Know The Way Back");
+                        alert.setContentText("Stack Is Empty");
+                        alert.showAndWait();
+                    }
+                }
+            }
+        }
+    }
+}
