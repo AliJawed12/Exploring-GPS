@@ -1,0 +1,61 @@
+/*
+Class instantiates an array holding the 8 cardinal direction of a compass
+
+Purpose of the class is to work with string to store in stack
+(Talked about this in class, instead of working with string when popping, I'm pushing the new
+string on to the stack, so all I need to do is pop it)
+
+ */
+
+
+public class Compass {
+
+    // |----------------------|
+    // | Private Data Members |
+    // |----------------------|
+    String[] cardinalDirections;
+
+
+    // |--------------|
+    // | Constructors |
+    // |--------------|
+    public Compass() {
+        cardinalDirections = new String[]{"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+    }
+
+    // No need for Setter and Getter Methods
+
+
+    // |--------|
+    // | Method |
+    // |--------|
+
+    // Method receives string in form of ZY,####
+    // Method works with ZY, and returns the direction CY to go back to start of journey
+    public String findWayBack(String pathIn) {
+        String newWayBack = "";
+        String[] tempArray = pathIn.split(",");
+        String currentDirection = tempArray[0];
+        String distance = tempArray[1].trim();
+
+        int index = 0;
+
+        // Loop to grab the index of the current direction
+        for (int i = 0; i < cardinalDirections.length; i++) {
+            if (currentDirection.equals(cardinalDirections[i])) {
+                index = i;
+            }
+        }
+
+        // Get the index value of the new direction
+        // mod index by length after adding 4 to wrap around array
+        index = (index + 4) % cardinalDirections.length;
+
+        // Assign value + concatenate variable
+        newWayBack = cardinalDirections[index];
+        newWayBack += ", " + distance;
+
+        return newWayBack;
+    }
+
+}
